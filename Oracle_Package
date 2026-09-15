@@ -1,0 +1,127 @@
+-- ============================================
+-- DATABASE SETUP
+-- ============================================
+
+CREATE TABLE departments (
+    department_id NUMBER PRIMARY KEY,
+    department_name VARCHAR2(50)
+);
+
+CREATE TABLE employees (
+    employee_id NUMBER PRIMARY KEY,
+    first_name VARCHAR2(50),
+    last_name VARCHAR2(50),
+    department_id NUMBER,
+    salary NUMBER,
+    CONSTRAINT fk_department
+        FOREIGN KEY (department_id)
+        REFERENCES departments(department_id)
+);
+
+INSERT INTO departments VALUES (1, 'IT');
+INSERT INTO departments VALUES (2, 'Finance');
+INSERT INTO departments VALUES (3, 'Human Resources');
+
+INSERT INTO employees VALUES (101, 'James', 'Carter', 1, 52000);
+INSERT INTO employees VALUES (102, 'Maria', 'Lopez', 1, 68000);
+INSERT INTO employees VALUES (103, 'Daniel', 'Kim', 2, 61000);
+INSERT INTO employees VALUES (104, 'Rachel', 'Morgan', 2, 79000);
+INSERT INTO employees VALUES (105, 'Kevin', 'Brooks', 3, 55000);
+
+-- ============================================
+-- PACKAGE IMPLEMENTATION
+-- ============================================
+-- EMPLOYEE PACKAGE SPECIFICATION
+CREATE OR REPLACE PACKAGE employee_package AS
+
+  PROCEDURE give_employee_raise (
+    p_employee_id NUMBER,
+    p_amount NUMBER
+  );
+
+  PROCEDURE change_employee_department(
+    p_employee_id NUMBER,
+    p_new_department_id NUMBER
+  );
+
+  FUNCTION get_salary(
+  p_employee_id NUMBER
+  )
+  RETURN NUMBER;
+
+  FUNCTION get_employee_name(
+  p_employee_id NUMBER
+  )
+  RETURN VARCHAR2;
+
+END employee_package;
+/
+
+-- EMPLOYEE PACKAGE BODY
+CREATE OR REPLACE PACKAGE BODY employee_package AS 
+  
+  PROCEDURE give_employee_raise (
+      p_employee_id NUMBER,
+      p_amount NUMBER
+    )
+    AS
+    BEGIN
+      UPDATE employees
+      SET salary = salary + p_amount
+      WHERE employee_id = p_employee_id;
+    END give_employee_raise;
+
+  PROCEDURE change_employee_department(
+      p_employee_id NUMBER,
+      p_new_department_id NUMBER
+    )
+    AS
+    BEGIN
+      UPDATE employees
+      SET department_id = p_new_department_id
+      WHERE employee_id = p_employee_id;
+    END change_employee_department;
+
+  FUNCTION get_salary(
+      p_employee_id NUMBER
+    )
+    RETURN NUMBER
+    AS
+      v_salary NUMBER;
+    BEGIN
+      SELECT 
+      salary
+      INTO v_salary
+      FROM employees 
+      WHERE employee_id = p_employee_id;
+
+      RETURN v_salary;
+
+    EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+        RETURN NULL;
+
+    END get_salary;
+
+    FUNCTION get_employee_name(
+      p_employee_id NUMBER
+    )
+    RETURN VARCHAR2
+    AS
+      v_name VARCHAR2(50);
+    BEGIN
+      SELECT 
+      first_name || ' ' || last_name
+      INTO v_name
+      FROM employees
+      WHERE employee_id = p_employee_id;
+
+      RETURN v_name;
+
+    EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+        RETURN NULL;
+    END get_employee_name;
+  
+END employee_package;
+/
