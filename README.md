@@ -3,6 +3,8 @@ This code is to show an example of knowledge using packages, procedures, and fun
 
 # Database Setup
 This sets up the tables that are going to be utilized for the example
+* departments
+* employees
 
 # PL/SQL Package
 This is the implementation of a package called "employee_package". 
